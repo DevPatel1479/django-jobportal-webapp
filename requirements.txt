@@ -20,3 +20,5 @@ whitenoise>=6.0
 python-decouple>=3.8
 
 
+# Pillow is the Python Imaging Library required for handling ImageField in Django models
+Pillow>=9.0
