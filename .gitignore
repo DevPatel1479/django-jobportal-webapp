@@ -12,7 +12,7 @@ ENV/
 .webvenv/
 
 # Django migrations
-*/migrations/
+
 *.log
 
 # SQLite database (if used during local testing)
