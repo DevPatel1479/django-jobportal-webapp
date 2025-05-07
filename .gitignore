@@ -1,0 +1,57 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+webvenv/
+env/
+ENV/
+.venv/
+.webvenv/
+
+# Django migrations
+*/migrations/
+*.log
+
+# SQLite database (if used during local testing)
+*.sqlite3
+
+# PostgreSQL dumps (optional if you export)
+*.sql
+
+# Environment variables
+.env
+.env.*
+
+# Media and static files (optional for local)
+media/
+staticfiles/
+
+# VS Code settings
+.vscode/
+
+# Mac OS / Windows system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Python egg
+*.egg-info/
+.eggs/
+
+# Coverage and test
+.coverage
+htmlcov/
+.tox/
+.nox/
+.pytest_cache/
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+
+# Render build & deployment files
+*.render*

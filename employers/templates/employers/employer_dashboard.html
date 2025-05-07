@@ -1,0 +1,492 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Employer Dashboard{% endblock %}</title>
+
+  <!-- Bootstrap CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/places.js@1.19.0/dist/cdn/places.min.css">
+  {% block css_content %}
+  {% endblock %}
+  <!-- Your custom CSS -->
+   
+   {% block parent_css %}
+  <link
+    href="{% static 'employers/css/employer_dashboard.css' %}"
+    rel="stylesheet"
+  >
+  {% endblock %}
+  
+</head>
+<body>
+    
+  <!-- Fixed Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/">JobProvider</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navMenu"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMenu">
+        <ul class="navbar-nav me-auto">
+          
+          <li class="nav-item"><a class="nav-link" href="{% url 'about_us'  %}">About</a></li>
+          
+          
+        </ul>
+        <div class="d-flex">
+          {% if user.is_authenticated %}
+          <div class="dropdown">
+            <a
+              class="btn btn-secondary dropdown-toggle"
+              href="#"
+              role="button"
+              id="userMenu"
+              data-bs-toggle="dropdown"
+            ><i class="fas fa-user-circle fa-lg"></i></a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+              <li><a class="dropdown-item" href="{% url 'employer_profile' %}">Profile</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <form method="post" action="{% url 'logout' %}">
+                  {% csrf_token %}
+                  <button class="dropdown-item">Logout</button>
+                </form>
+              </li>
+            </ul>
+          </div>
+          {% else %}
+            <a href="{% url 'login' %}" class="btn btn-outline-light me-2">Login</a>
+            <a href="{% url 'register' %}" class="btn btn-primary">Register</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
+  {% if messages %}
+  <div class="position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 1055;">
+    <div id="messageToast" class="toast align-items-center text-bg-primary border-0" role="alert">
+      <div class="d-flex">
+        <div class="toast-body">
+          {% for message in messages %}
+            <p>{{ message }}</p>
+          {% endfor %}
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055;">
+    <div id="jobToast" class="toast align-items-center text-bg-primary border-0" role="alert">
+      <div class="d-flex">
+        <div class="toast-body" id="toastMessage">Job Posting Updated Successfully!</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    </div>
+  </div>
+
+  {% block content %}
+  <!-- Main Content -->
+  <div class="container-fluid px-4 py-4 dashboard-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="fw-bold">Employer Dashboard</h2>
+      {% comment %} <a href="" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i> Post a New Job
+      </a> {% endcomment %}
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#postJobModal">
+        <i class="bi bi-plus-circle me-1"></i> Post a New Job
+      </button>
+      
+    </div>
+
+    <!-- Stats Row -->
+    <div class="row g-4 mb-4">
+      <div class="col-md-3">
+        <div class="card shadow-sm border-0">
+          <div class="card-body text-center">
+            <h5 class="text-primary">Jobs Posted</h5>
+            <h3 class="fw-bold">{{ jobs_posted_count }}</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card shadow-sm border-0">
+          <div class="card-body text-center">
+            <h5 class="text-success">Applications</h5>
+            <h3 class="fw-bold">{{ applications_count }}</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card shadow-sm border-0">
+          <div class="card-body text-center">
+            <h5 class="text-warning">Shortlisted</h5>
+            <h3 class="fw-bold">{{ shortlisted_count }}</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card shadow-sm border-0">
+          <div class="card-body text-center">
+            <h5 class="text-danger">Rejected</h5>
+            <h3 class="fw-bold">{{ rejected_count }}</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Job Listings -->
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-white fw-semibold">
+        Your Job Listings
+        <div class="d-flex">
+          <button id="toggleBulkDelete" class="btn btn-sm btn-outline-warning me-2">Enable Bulk Delete</button>
+          <button id="deleteSelected" class="btn btn-sm btn-danger" style="display: none;">Delete Selected</button>
+        </div>
+      </div>
+      {% comment %} <div class="card-body p-0">
+        <div class="mb-2 d-flex justify-content-between">
+          <button id="toggleBulkDelete" class="btn btn-sm btn-outline-warning">Enable Bulk Delete</button>
+          <button id="deleteSelected" class="btn btn-sm btn-danger" style="display: none;">Delete Selected</button>
+        </div> {% endcomment %}
+        
+        <table class="table table-striped table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th><input type="checkbox" id="selectAll" style="display: none;"></th>  
+              <th>Title</th>
+              <th>Location</th>
+              <th>Posted On</th>
+              <th>Applications</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for job in jobs %}
+            <tr>
+              <td>
+                <input type="checkbox" class="job-checkbox form-check-input" value="{{ job.id }}" style="display: none;">
+              </td>
+              <td>{{ job.title }}</td>
+              <td>{{ job.location }}</td>
+              <td>{{ job.created_at|date:"M d, Y" }}</td>
+              <td>{{ job.applications.count }}</td>
+              <td>
+                <button 
+                  class="btn btn-sm btn-outline-primary view-btn" 
+                  data-id="{{ job.id }}"
+                  data-bs-toggle="modal"
+                  data-bs-target="#viewJobModal"
+                >
+                  View
+                </button>
+                
+                <button 
+                  class="btn btn-sm btn-outline-secondary edit-btn" 
+                  data-id="{{ job.id }}"
+                  data-bs-toggle="modal"
+                  data-bs-target="#editJobModal"
+                >
+                  Edit
+                </button>
+                <a href="{% url 'view_applicants' job.id %}" class="btn btn-sm btn-outline-success">
+                  View Applicants
+                </a>
+                <a href="{% url 'jobs:job_delete' job.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this job?');">Delete</a>
+              </td>
+              
+              
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" class="text-center py-4">No job listings yet.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  
+  <!-- Post Job Modal -->
+<div class="modal fade" id="postJobModal" tabindex="-1" aria-labelledby="postJobModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <form method="POST">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="postJobModalLabel">Post a New Job</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          {% comment %} {{ form.as_p }} {% endcomment %}
+          <div class="mb-3">
+            {{ form.title.label_tag }}
+            {{ form.title }}
+            {{ form.title.errors }}
+          </div>
+          
+          <div class="mb-3">
+            {{ form.description.label_tag }}
+            {{ form.description }}
+            {{ form.description.errors }}
+          </div>
+          <div class="mb-3">
+            {{ form.requirements.label_tag }}
+            {{ form.requirements }}
+            {{ form.requirements.errors }}
+          </div>
+          <div class="mb-3">
+            {{ form.salary.label_tag }}
+            {{ form.salary }}
+            {{ form.salary.errors }}
+          </div>
+          <div class="mb-3">
+            {{ form.category.label_tag }}
+            {{ form.category }}
+            {{ form.category.errors }}
+          </div>
+          
+          <div class="mb-3">
+            {{ form.job_type.label_tag }}  <!-- Add label for job_type -->
+            {{ form.job_type }}            <!-- Add the dropdown here -->
+            {{ form.job_type.errors }}
+          </div>
+          <div class="mb-3">
+            <label for="country">Country</label>
+            <select id="country" class="form-select" required>
+              <option value="">Select Country</option>
+            </select>
+          </div>
+          
+          <div class="mb-3">
+            <label for="city">City</label>
+            <select id="city" class="form-select" required disabled>
+              <option value="">Select City</option>
+            </select>
+          </div>
+          
+          <div class="mb-3">
+            {{ form.location.label_tag }}
+            {{ form.location }}
+            {{ form.location.errors }}
+          </div>
+          
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Post Job</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="ajaxModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content" id="ajaxModalContent">
+      <!-- Content will be loaded here -->
+    </div>
+  </div>
+</div>
+{% if show_post_modal %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const postModalEl = document.getElementById('postJobModal');
+    new bootstrap.Modal(postModalEl).show();
+  });
+</script>
+{% endif %}
+  {% endblock %}
+  <!-- Bootstrap JS Bundle (Popper included) -->
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+  <script>
+    const toggleBtn = document.getElementById("toggleBulkDelete");
+  const deleteBtn = document.getElementById("deleteSelected");
+  const checkboxes = document.querySelectorAll(".job-checkbox");
+  const selectAll = document.getElementById("selectAll");
+
+  let bulkMode = false;
+  toggleBtn.addEventListener("click", () => {
+    bulkMode = !bulkMode;
+
+    checkboxes.forEach(cb => cb.style.display = bulkMode ? "inline-block" : "none");
+    selectAll.style.display = bulkMode ? "inline-block" : "none";
+    deleteBtn.style.display = bulkMode ? "inline-block" : "none";
+    toggleBtn.textContent = bulkMode ? "Cancel Bulk Delete" : "Enable Bulk Delete";
+  });
+
+  selectAll.addEventListener("change", () => {
+    checkboxes.forEach(cb => cb.checked = selectAll.checked);
+  });
+
+  deleteBtn.addEventListener("click", () => {
+    const selected = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+    
+    if (selected.length === 0) {
+      alert("Please select at least one job.");
+      return;
+    }
+
+    if (!confirm(`Are you sure you want to delete ${selected.length} job(s)?`)) return;
+
+    fetch("{% url 'jobs:bulk_delete' %}", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": "{{ csrf_token }}",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ job_ids: selected })
+    })
+    .then(response => {
+      if (response.ok) {
+        window.location.reload();
+      } else {
+        alert("Failed to delete selected jobs.");
+      }
+    });
+  });
+    let countryCityData = [];
+
+  // Fetch countries and cities
+  fetch("https://countriesnow.space/api/v0.1/countries")
+    .then(res => res.json())
+    .then(data => {
+      countryCityData = data.data;
+      const countrySelect = document.getElementById("country");
+      countryCityData.forEach(item => {
+        const opt = document.createElement("option");
+        opt.value = item.country;
+        opt.textContent = item.country;
+        countrySelect.appendChild(opt);
+      });
+    });
+
+  // Update cities based on selected country
+  document.getElementById("country").addEventListener("change", function () {
+    const selectedCountry = this.value;
+    const citySelect = document.getElementById("city");
+    citySelect.innerHTML = '<option value="">Select City</option>';
+    citySelect.disabled = true;
+
+    const countryData = countryCityData.find(c => c.country === selectedCountry);
+    if (countryData) {
+      countryData.cities.forEach(city => {
+        const opt = document.createElement("option");
+        opt.value = city;
+        opt.textContent = city;
+        citySelect.appendChild(opt);
+      });
+      citySelect.disabled = false;
+    }
+  });
+
+  // Auto-fill hidden location field
+  document.getElementById("city").addEventListener("change", function () {
+    const selectedCity = this.value;
+    const selectedCountry = document.getElementById("country").value;
+    const locationInput = document.getElementById("id_location");  // Django field
+    if (selectedCity && selectedCountry) {
+      locationInput.value = `${selectedCity}, ${selectedCountry}`;
+    }
+  });
+
+  document.addEventListener("DOMContentLoaded", function () {
+    
+    document.querySelectorAll(".btn-outline-primary, .btn-outline-secondary").forEach(button => {
+      button.addEventListener("click", function (e) {
+        e.preventDefault();
+        
+        const jobId = this.getAttribute("data-id"); // Get the job ID from the button
+        
+        // Determine if we're showing the details or editing
+        let url;
+        if (this.classList.contains("view-btn")) {
+          url = `/jobs/${jobId}/details/`; // URL for job details
+        } else if (this.classList.contains("edit-btn")) {
+          url = `/jobs/${jobId}/edit/`; // URL for job edit form
+        }
+        
+        // Fetch the job data using the appropriate URL
+        fetch(url, {
+          headers: {
+            "X-Requested-With": "XMLHttpRequest"
+          }
+        })
+        .then(response => response.text())
+        .then(html => {
+          document.getElementById("ajaxModalContent").innerHTML = html;
+          new bootstrap.Modal(document.getElementById("ajaxModal")).show();
+        })
+        .catch(error => console.error("Error fetching job data:", error));
+      });
+      const postModal = document.getElementById('postJobModal');
+    postModal.addEventListener('hidden.bs.modal', () => {
+      // reset all inputs back to their initial (blank) state:
+      postModal.querySelector('form').reset();
+
+      // remove any inline error messages:
+      postModal.querySelectorAll('.text-danger').forEach(el => el.remove());
+
+      // remove error classes from inputs (if you added them in Django):
+      postModal.querySelectorAll('.is-invalid').forEach(input => {
+        input.classList.remove('is-invalid');
+      });
+    });
+    });
+    document
+  .getElementById("ajaxModalContent")
+  .addEventListener("submit", function (e) {
+    // only handle our edit form
+    if (e.target.id !== "editJobForm") return;
+    e.preventDefault();
+
+    const form = e.target;
+    const url  = form.getAttribute("action");      // e.g. /jobs/123/edit/
+    const data = new FormData(form);
+
+    fetch(url, {
+      method: "POST",
+      body: data,
+      headers: { "X-Requested-With": "XMLHttpRequest" },
+    })
+      .then(res => res.json())
+      .then(json => {
+        if (json.success) {
+          // 1️⃣ close the modal
+          bootstrap.Modal.getInstance(
+            document.getElementById("ajaxModal")
+          ).hide();
+
+          // 2️⃣ optionally: update that row in your table via DOM or reload page
+
+          // 3️⃣ show your toast
+          const toastEl = document.getElementById("jobToast");
+          new bootstrap.Toast(toastEl).show();
+        } else {
+          // if you want to re-render form with errors:
+          document.getElementById("ajaxModalContent").innerHTML = json.html;
+        }
+      })
+      .catch(console.error);
+  });
+});
+
+  </script>
+  
+</body>
+</html>

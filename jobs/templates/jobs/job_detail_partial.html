@@ -1,0 +1,23 @@
+  <div class="modal-header">
+      <h5 class="modal-title">Job Details - {{ job.title }}</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+    {% load tz %}
+    <div class="modal-body">
+      <p><strong>Location:</strong> {{ job.location }}</p>
+      <p><strong>Description:</strong> {{ job.description }}</p>
+      <p><strong>Requirements:</strong> {{ job.requirements }}</p>
+      <p><strong>Salary:</strong> ₹{{ job.salary }}</p>
+      <p><strong>Category:</strong> {{ job.category }}</p>
+      <p><strong>Job Type:</strong> {{ job.get_job_type_display }}</p>
+      <p><strong>Posted on: </strong>{{ job.created_at|localtime|date:"M d, Y \\a\\t h:i A" }}</p>
+      <p>
+        <strong>Last updated:</strong>
+        {{ job.last_updated|localtime|date:"M d, Y \\a\\t h:i A" }}
+      </p>
+      
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    </div>
+    

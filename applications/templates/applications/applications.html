@@ -1,0 +1,134 @@
+{% extends 'core/home/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4 text-center pt-4">Your Job Applications</h2>
+
+  {% if applications %}
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover table-striped">
+        <thead class="thead-dark">
+          <tr>
+            <th scope="col">Job Title</th>
+            <th scope="col">Company Name</th>
+            <th scope="col">Location</th>
+            <th scope="col">Job Type</th>
+            <th scope="col">Salary</th>
+            <th scope="col">Applied On</th>
+            <th scope="col">Status</th>
+            <th scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for app in applications %}
+            <tr id="application-{{ app.id }}">
+              <td>{{ app.job.title }}</td>
+              <td>{{ app.job.employer.company_name }}</td>
+              <td>{{ app.job.location }}</td>
+              <td>{{ app.job.get_job_type_display }}</td>
+              <td>₹{{ app.job.salary }}</td>
+              <td>{{ app.applied_at|date:"F d, Y" }}</td>
+              <td>
+                <span class="badge 
+                  {% if app.status == 'hired' %}bg-success
+                  {% elif app.status == 'interview' %}bg-info
+                  {% else %}bg-warning text-dark{% endif %}">
+                  {{ app.get_status_display }}
+                </span>
+              </td>
+              <td>
+                
+                {% if app.status == 'applied' %}
+                <button class="btn btn-danger btn-sm" onclick="confirmWithdraw({{ app.id }})" id="withdraw-btn-{{ app.id }}">Withdraw</button>
+              {% else %}
+                <button class="btn btn-danger btn-sm" disabled>Withdrawn</button>
+              {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="mt-4">
+      {% if is_paginated %}
+        <nav>
+          <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+              </li>
+            {% endif %}
+            {% for num in paginator.page_range %}
+              <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+              </li>
+            {% endfor %}
+            {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
+      {% endif %}
+    </div>
+  {% else %}
+  <div class="alert alert-info text-center d-flex align-items-center justify-content-center" role="alert">
+    <div class="me-3">
+      <i class="bi bi-emoji-frown fs-1"></i> <!-- Bootstrap icon for a sad face -->
+    </div>
+    <div>
+      <h4 class="mb-0">You haven't applied to any jobs yet.</h4>
+      <p class="mb-0">Once you start applying, they will appear here.</p>
+    </div>
+  </div>
+  {% endif %}
+</div>
+<!-- Hidden form for withdrawing the application -->
+<form id="withdraw-form" method="POST" style="display:none;">
+    {% csrf_token %}
+    <input type="hidden" name="application_id" id="application_id">
+    <input type="hidden" name="status" value="withdrawn">
+  </form>
+{% endblock %}
+
+
+{% block scriptloader %}
+<script>
+    function confirmWithdraw(applicationId) {
+      if (confirm('Are you sure you want to withdraw your application?')) {
+        // Update the status using AJAX
+        document.getElementById('application_id').value = applicationId;
+        const form = document.getElementById('withdraw-form');
+  
+        // Send the form data to the server using AJAX
+        fetch("{% url 'withdraw_application' %}", {
+          method: "POST",
+          body: new FormData(form),
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Disable the withdraw button and change its text
+            document.getElementById('withdraw-btn-' + applicationId).disabled = true;
+            document.getElementById('withdraw-btn-' + applicationId).textContent = 'Withdrawn';
+            // Update the status badge
+            let statusBadge = document.getElementById('application-' + applicationId).querySelector('td span');
+            statusBadge.classList.remove('bg-warning', 'text-dark');
+            statusBadge.classList.add('bg-danger');
+            statusBadge.textContent = 'Withdrawn';
+          } else {
+            alert('Failed to withdraw the application');
+          }
+        })
+        .catch(error => {
+          alert('An error occurred');
+        });
+      }
+    }
+  </script>
+
+{% endblock %}

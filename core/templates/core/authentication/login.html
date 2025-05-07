@@ -1,0 +1,70 @@
+{% extends "core/home/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- Display messages -->
+{% if messages %}
+    {% for message in messages %}
+        <div class="popup {% if message.tags %}{{ message.tags }}{% endif %}">
+            <strong>{{ message.tags|capfirst }}:</strong> {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<style>
+.popup {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #ff4d4d;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 16px;
+    z-index: 1051;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+    animation: fadeOut 4s ease-out forwards;
+}
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; display: none; }
+}
+.text-danger {
+    font-size: 13px;
+    color: red;
+}
+</style>
+
+<link rel="stylesheet" href="{% static 'core/css/auth.css' %}">
+
+<section class="auth-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow-lg p-4">
+                    <h2 class="text-center mb-4">Login</h2>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Login</button>
+                        </div>
+                    </form>
+                    <p class="text-center mt-3">Don't have an account? <a href="{% url 'register' %}">Register here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

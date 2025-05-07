@@ -1,0 +1,72 @@
+{% extends 'employers/employer_dashboard.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="fw-bold text-center mb-4">Applicants for {{ job.title }}</h2>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead class="table-light">
+                <tr>
+                    <th>Profile Picture</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Resume</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for application in applications %}
+                <tr>
+                    <td class="text-center">
+                        {% if application.job_seeker.profile_photo %}
+        <img src="{{ application.job_seeker.profile_photo.url }}" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;" alt="{{ application.job_seeker.name }}">
+    {% else %}
+        <span class="text-muted">No Photo</span>
+    {% endif %}
+                    </td>
+                    <td>{{ application.job_seeker.name }}</td>
+                    <td>{{ application.job_seeker.user.email }}</td>
+                    <td>   {% if application.job_seeker.resume %}
+                        <a href="{{ application.job_seeker.resume.url }}" target="_blank" class="btn btn-link">View Resume</a>
+                    {% else %}
+                        <span class="text-muted">No Resume</span>
+                    {% endif %}</td>
+                    <td>
+                        <span class="badge {% if application.status == 'Shortlisted' %}bg-success{% elif application.status == 'Rejected' %}bg-danger{% else %}bg-warning{% endif %}">
+                            {{ application.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <form method="POST" action="{% url 'view_applicants' job.id %}" class="d-inline-block">
+                            {% csrf_token %}
+                            <input type="hidden" name="application_id" value="{{ application.id }}">
+                    
+                            <!-- Shortlist Button -->
+                            <button type="submit" name="action" value="shortlist"
+                                class="btn btn-info text-white btn-sm me-2"
+                                {% if application.status == 'shortlisted' or application.status == 'withdrawn' %}disabled{% endif %}>
+                                Shortlist
+                            </button>
+                    
+                            <!-- Reject Button -->
+                            <button type="submit" name="action" value="reject"
+                                class="btn btn-danger btn-sm"
+                                onclick="return confirm('Are you sure you want to reject this applicant?');"
+                                {% if application.status == 'rejected' or application.status == 'withdrawn' %}disabled{% endif %}>
+                                Reject
+                            </button>
+                        </form>
+                    </td>
+                    
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted">No applicants yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

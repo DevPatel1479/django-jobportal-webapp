@@ -1,0 +1,32 @@
+/* push everything below the fixed navbar */
+body {
+    padding-top: 56px;  /* match your navbar height */
+  }
+  
+  /* extra spacing for the content wrapper */
+  .dashboard-content {
+    margin-top: 16px;
+  }
+  
+  /* card hover effect (optional) */
+  .card:hover {
+    transform: translateY(-3px);
+    transition: transform 0.2s ease;
+  }
+  
+  /* tweak table header */
+  .table thead th {
+    font-weight: 600;
+  }
+  
+  /* style for the "Post a New Job" button */
+  .btn-primary {
+    background-color: #4f46e5;
+    border-color: #4f46e5;
+  }
+  .btn-primary:hover {
+    background-color: #6366f1;
+    border-color: #6366f1;
+  }
+  
+

@@ -1,0 +1,678 @@
+{% extends "core/home/base.html" %}
+{% load static %}
+
+{% block content %}
+{% if messages %}
+  {% for msg in messages %}
+    <div
+      class="toast align-items-center text-bg-{{ msg.tags }} border-0 mb-2"
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+      data-bs-delay="2000"
+      data-bs-autohide="true"
+    >
+      <div class="d-flex">
+        <div class="toast-body">{{ msg }}</div>
+        <button
+          type="button"
+          class="btn-close btn-close-white me-2 m-auto"
+          data-bs-dismiss="toast"
+          aria-label="Close"
+        ></button>
+      </div>
+    </div>
+  {% endfor %}
+{% endif %}
+<section class="profile-section py-5">
+  <div class="container">
+    <!-- Profile Header -->
+    <div class="row mb-4">
+      <div class="col-12 text-center">
+        <h1 class="profile-title">My Profile</h1>
+        
+      </div>
+    </div>
+
+    <!-- Profile Card -->
+    <div class="row profile-card">
+      <div class="col-md-4 text-center position-relative mb-4 mb-md-0">
+        <!-- Profile picture using Bootstrap placeholder -->
+        <div class="profile-image-container">
+          {% if jobseeker_profile.profile_photo %}
+            <img src="{{ jobseeker_profile.profile_photo.url }}" 
+                 class="rounded-circle profile-img" 
+                 alt="Profile photo">
+          {% else %}
+            <div class="rounded-circle profile-img d-flex align-items-center justify-content-center bg-secondary text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" fill="currentColor" class="bi bi-person-fill" viewBox="0 0 16 16">
+                <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3Zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
+              </svg>
+            </div>
+          {% endif %}
+          
+          <form method="POST" action="{% url 'profile' %}" enctype="multipart/form-data" id="profilePhotoForm">
+            {% csrf_token %}
+            <input type="file" name="profile_photo" id="profilePhotoInput" 
+                   accept="image/*" style="display: none;"
+                   onchange="document.getElementById('profilePhotoForm').submit()">
+            <label for="profilePhotoInput" class="upload-btn" title="Upload/Replace Profile Picture">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-camera" viewBox="0 0 16 16">
+                <path d="M15 12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h1.172a3 3 0 0 0 2.12-.879l.83-.828A1 1 0 0 1 6.827 3h2.344a1 1 0 0 1 .707.293l.828.828A3 3 0 0 0 12.828 5H14a1 1 0 0 1 1 1v6zM2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4H2z"/>
+                <path d="M8 11a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5zm0 1a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
+              </svg>
+            </label>
+          </form>
+        </div>
+        <h2 class="profile-name mt-3">{{ jobseeker_profile.name|default:"Your Name" }}</h2>
+        <p class="profile-email">{{ user.email }}</p>
+      </div>
+      <div class="col-md-8">
+        <!-- Resume Section -->
+        <div class="profile-details">
+          <div class="d-flex align-items-center mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-file-earmark-text me-2 section-icon" viewBox="0 0 16 16">
+              <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5z"/>
+              <path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5L9.5 0zm0 1v2A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
+            </svg>
+            <h3 class="section-title mb-0">Resume</h3>
+          </div>
+          {% if jobseeker_profile.resume %}
+            <div class="ps-4">
+              <p>You can download your current resume below:</p>
+              <a href="{{ jobseeker_profile.resume.url }}" class="btn btn-primary" download>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download me-2" viewBox="0 0 16 16">
+                  <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                  <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                </svg>
+                Download Resume
+              </a>
+              <form method="POST" action="{% url 'delete_resume' %}">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-danger mt-2" type="submit">Remove Resume</button>
+              </form>
+            </div>
+          {% else %}
+          <div class="alert alert-warning ms-4 resume-alert">
+            <!-- The label triggers the hidden file input -->
+            <form method="POST" action="{% url 'upload_resume' %}" enctype="multipart/form-data" id="resumeUploadForm" class="ps-4">
+              {% csrf_token %}
+              <!-- Hidden file input that will be triggered by "Upload Now" -->
+              <input type="file" name="resume" id="resumeInput" accept=".pdf,.doc,.docx" style="display: none;" required>
+            </form>
+            <span id="uploadLabel">
+              <label for="resumeInput" class="btn btn-success" style="cursor:pointer;">Upload Now</label>
+            </span>
+            <!-- Hidden file input -->
+            <input type="file" id="resumeInput" accept=".pdf,.doc,.docx" style="display:none;">
+            
+            <!-- Preview container; initially hidden -->
+            <div id="resumePreview" class="resume-preview" style="display:none; margin-top:10px; flex-direction: column; gap: 5px;">
+              <!-- The preview contents (file name, file icon/iframe, and remove button) will be injected via JS -->
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Skills Section -->
+        <div class="profile-details">
+          <div class="d-flex align-items-center mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-gear me-2 section-icon" viewBox="0 0 16 16">
+              <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
+              <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z"/>
+            </svg>
+            <h3 class="section-title mb-0">Skills</h3>
+          </div>
+          <div class="ps-4">
+            <div class="skills-container d-flex flex-wrap gap-2 mb-3">
+              {% for skill in skills %}
+                <div class="skill-badge">
+                  {{ skill.name }}
+                  <button class="btn-remove-skill" data-skill-name="{{ skill.name }}">
+                    &times;
+                  </button>
+                </div>
+              {% endfor %}
+            </div>
+            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addSkillModal">
+              <i class="bi bi-plus-circle me-1"></i> Add Skill
+            </button>
+          </div>          
+
+        </div>
+        {% comment %} {% endif %} {% endcomment %}
+        <!-- Add Skill Modal -->
+<div class="modal fade" id="addSkillModal" tabindex="-1" aria-labelledby="addSkillModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="POST" action="{% url 'add_skill' %}">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addSkillModalLabel">Add a Skill</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="text" name="skill_name" class="form-control" placeholder="Enter skill name" required>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Add Skill</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+        <!-- About Me Section -->
+        <div class="profile-details">
+          <div class="d-flex align-items-center mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-person me-2 section-icon" viewBox="0 0 16 16">
+              <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
+            </svg>
+            <h3 class="section-title mb-0">About Me</h3>
+          </div>
+          <div class="ps-4">
+            <form method="POST" action="{% url 'profile' %}">
+              {% csrf_token %}
+              <div class="form-group">
+                <textarea class="form-control bg-dark text-light" 
+                          name="about_me" 
+                          rows="4"
+                          placeholder="Tell us about yourself...">{% if jobseeker_profile.about_me %}{{ jobseeker_profile.about_me }}{% endif %}</textarea>
+              </div>
+              <button type="submit" class="btn btn-primary mt-2">
+                {% if jobseeker_profile.about_me %}Update{% else %}Save{% endif %} About Me
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+
+{% block scriptloader %}
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+      const resumeInput = document.getElementById("resumeInput");
+      const resumePreview = document.getElementById("resumePreview");
+      const uploadLabel = document.getElementById("uploadLabel");
+      const container = document.getElementById('toastContainer');
+      document.querySelectorAll('.toast').forEach(el => {
+      container.appendChild(el);
+      new bootstrap.Toast(el).show();
+    });
+      document.querySelectorAll('.edit-about-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const form = document.getElementById('aboutMeForm');
+            form.classList.remove('collapse');
+            button.closest('.about-me-content').classList.add('collapse');
+        });
+    });
+    
+    // Handle form submission
+    const aboutForm = document.getElementById('aboutMeForm');
+    if (aboutForm) {
+        aboutForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            
+            fetch(window.location.href, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.reload(); // Reload to show updated content
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    }
+      if (resumeInput){
+        document.getElementById('resumeInput').addEventListener('change', function () {
+          const form = document.getElementById('resumeUploadForm');
+          if (this.files.length > 0) {
+            form.submit(); // Auto-submit the form after file selection
+          }
+        });
+        resumeInput.addEventListener("change", function(){
+          if (this.files && this.files.length > 0) {
+            const file = this.files[0];
+    
+            // Hide the upload label so it doesn't show again while a file is selected
+            if (uploadLabel) {
+              uploadLabel.style.display = "none";
+            }
+            
+            // Clear any existing preview content
+            resumePreview.innerHTML = "";
+    
+            // Create a container for file information (icon and filename)
+            const fileInfoContainer = document.createElement("div");
+            fileInfoContainer.style.display = "flex";
+            fileInfoContainer.style.alignItems = "center";
+            fileInfoContainer.style.gap = "8px";
+            
+            // Create a file icon element (using an inline SVG)
+            const fileIcon = document.createElement("span");
+            fileIcon.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                   class="bi bi-file-earmark-text" viewBox="0 0 16 16">
+                 <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5z"/>
+                 <path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5L9.5 0zm0 1v2A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
+              </svg>
+            `;
+            
+            // Create a span to show the file name
+            const fileNameSpan = document.createElement("span");
+            fileNameSpan.textContent = file.name;
+    
+            fileInfoContainer.appendChild(fileIcon);
+            fileInfoContainer.appendChild(fileNameSpan);
+            resumePreview.appendChild(fileInfoContainer);
+    
+            // If the file is a PDF, show an inline preview in an iframe
+            if (file.type === "application/pdf") {
+              const iframe = document.createElement("iframe");
+              iframe.style.width = "100%";
+              iframe.style.height = "400px";
+              iframe.style.marginTop = "8px";
+              iframe.src = URL.createObjectURL(file);
+              resumePreview.appendChild(iframe);
+            } else {
+              // For other file types, add a "Preview" button to open the file in a new tab if possible.
+              const previewButton = document.createElement("button");
+              previewButton.textContent = "Preview";
+              previewButton.className = "btn btn-secondary btn-sm";
+              previewButton.style.marginTop = "8px";
+              previewButton.addEventListener("click", function(){
+                const fileURL = URL.createObjectURL(file);
+                window.open(fileURL, "_blank");
+              });
+              resumePreview.appendChild(previewButton);
+            }
+            
+            // Create a Remove button
+            const removeButton = document.createElement("button");
+            removeButton.textContent = "Remove";
+            removeButton.className = "btn btn-danger btn-sm";
+            removeButton.style.marginTop = "8px";
+            removeButton.addEventListener("click", function(){
+              resumeInput.value = "";
+              resumePreview.innerHTML = "";
+              resumePreview.style.display = "none";
+              if (uploadLabel) {
+                uploadLabel.style.display = "inline";
+              }
+            });
+            resumePreview.appendChild(removeButton);
+            
+            // Ensure the preview container is visible
+            resumePreview.style.display = "flex";
+            resumePreview.style.flexDirection = "column";
+            resumePreview.style.gap = "8px";
+          }
+        });
+  
+      }
+      
+
+
+      const addSkillForm = document.getElementById('addSkillForm');
+      if (addSkillForm) {
+        addSkillForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          const formData = new FormData(this);
+          
+          fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+            },
+            credentials: 'same-origin'
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.status === 'success') {
+              const modal = bootstrap.Modal.getInstance(document.getElementById('addSkillModal'));
+              modal.hide();
+              addSkillToUI(data.skill);
+            }
+          })
+          .catch(error => console.error('Error:', error));
+        });
+      }
+    
+      // Remove Skill handlers
+      document.querySelectorAll('.btn-remove-skill').forEach(button => {
+        button.addEventListener('click', removeSkillHandler);
+      });
+    
+      function addSkillToUI(skillName) {
+        const skillsContainer = document.querySelector('.skills-container');
+        const skillBadge = `
+          <div class="skill-badge">
+            ${skillName}
+            <button class="btn-remove-skill" data-skill-name="${skillName}">
+              &times;
+            </button>
+          </div>
+        `;
+    
+        if (skillsContainer) {
+          skillsContainer.insertAdjacentHTML('beforeend', skillBadge);
+          skillsContainer.lastElementChild.querySelector('.btn-remove-skill')
+            .addEventListener('click', removeSkillHandler);
+        } else {
+          createSkillsContainer(skillBadge);
+        }
+      }
+    
+      function removeSkillHandler(event) {
+        const skillBadge = event.target.closest('.skill-badge');
+        const skillName = event.target.dataset.skillName;
+        
+        const formData = new FormData();
+        formData.append('skill_name', skillName);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    
+        fetch("{% url 'remove_skill' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.status === 'success') {
+                // Animate removal
+                skillBadge.style.transition = 'all 0.3s ease';
+                skillBadge.style.opacity = '0';
+                skillBadge.style.transform = 'translateX(100px)';
+                
+                // Remove from DOM after animation
+                setTimeout(() => {
+                    skillBadge.remove();
+                    checkEmptySkills();
+                }, 300);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error removing skill. Please try again.');
+        });
+    }
+      function createSkillsContainer(skillBadge) {
+        const skillsDiv = document.querySelector('.profile-details .ps-4');
+        const newContainer = document.createElement('div');
+        newContainer.className = 'skills-container d-flex flex-wrap gap-2 mb-3';
+        newContainer.innerHTML = skillBadge;
+        skillsDiv.insertBefore(newContainer, skillsDiv.querySelector('.btn'));
+        newContainer.querySelector('.btn-remove-skill')
+          .addEventListener('click', removeSkillHandler);
+      }
+    
+      function checkEmptySkills() {
+        const skillsContainer = document.querySelector('.skills-container');
+        if (skillsContainer && skillsContainer.children.length === 0) {
+          skillsContainer.remove();
+        }
+      }
+    });
+  </script>
+      
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Add to extra_css block */
+  .about-me-content p {
+    white-space: pre-wrap;
+    background: #2a2a2a;
+    padding: 1rem;
+    border-radius: 4px;
+}
+
+.edit-about-btn {
+    font-size: 0.9rem;
+    text-decoration: none !important;
+}
+
+.edit-about-btn:hover {
+    color: #ffb74d !important;
+}
+.skill-badge {
+  background-color: #0dcaf0;
+  color: #000;
+  padding: 0.5em 1em;
+  border-radius: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.btn-remove-skill {
+  background: none;
+  border: none;
+  color: rgba(0, 0, 0, 0.7);
+  cursor: pointer;
+  padding: 0 0.25rem;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.btn-remove-skill:hover {
+  color: #000;
+}
+
+.skills-container {
+  gap: 0.5rem;
+  min-height: 38px;
+}
+    .resume-preview {
+        display: flex;
+        align-items: center;
+        background: #2a2a2a;
+        border: 1px solid #444;
+        border-radius: 4px;
+        padding: 8px;
+        color: #f8f9fa;
+        font-size: 0.9rem;
+      }
+      
+  /* Dark Theme Profile Section Styling - Improved */
+  .profile-section {
+    background: #121212;
+    color: #f8f9fa;
+    min-height: 100vh;
+  }
+  .profile-title {
+    font-size: 2.5rem;
+    color: #f8f9fa;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+  }
+  .profile-subtitle {
+    font-size: 1.25rem;
+    color: #adb5bd;
+    font-weight: 300;
+  }
+  .profile-card {
+    background: #1e1e1e;
+    border-radius: 12px;
+    padding: 2.5rem;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+    color: #f8f9fa;
+    margin: 0 1rem;
+  }
+  .profile-image-container {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    margin: 0 auto;
+  }
+  .profile-img {
+    width: 180px;
+    height: 180px;
+    object-fit: cover;
+    border: 5px solid #333;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+  .profile-img:hover {
+    transform: scale(1.03);
+    border-color: #ff9800;
+  }
+  .upload-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(33, 33, 33, 0.8);
+    color: #fff;
+    padding: 10px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    text-decoration: none;
+    border: 2px solid #444;
+  }
+  .upload-btn:hover {
+    background: #ff9800;
+    color: #000;
+    border-color: #000;
+    transform: scale(1.1);
+  }
+  .profile-name {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #f8f9fa;
+    margin-top: 1rem;
+  }
+  .profile-email {
+    color: #adb5bd;
+    font-size: 1rem;
+    margin-top: 0.25rem;
+  }
+  .section-title {
+    font-size: 1.5rem;
+    color: #f8f9fa;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.25rem;
+  }
+  .section-icon {
+    color: #ff9800;
+  }
+  .profile-details {
+    margin-bottom: 2rem;
+    background: #252525;
+    border-radius: 8px;
+    padding: 1.25rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease;
+  }
+  .profile-details:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  }
+  .btn-primary {
+    background-color: #ff9800;
+    border: none;
+    color: #000;
+    font-weight: 600;
+    border-radius: 6px;
+    padding: 0.5rem 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.3s ease;
+  }
+  .btn-primary:hover {
+    background-color: #e68900;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+  .alert {
+    background: #2d2d2d;
+    border-left: 4px solid #ff9800;
+    color: #f1f1f1;
+    border-radius: 4px;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+  }
+  .alert-link {
+    font-weight: 600;
+    color: #ff9800;
+    text-decoration: none;
+    transition: color 0.2s ease;
+    margin-left: 0.25rem;
+  }
+  .alert-link:hover {
+    color: #ffb74d;
+    text-decoration: underline;
+  }
+  .skills-container {
+    background: #2a2a2a;
+    padding: 1rem;
+    border-radius: 6px;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 991px) {
+    .profile-card {
+      padding: 1.5rem;
+    }
+  }
+  
+  @media (max-width: 767px) {
+    .profile-title {
+      font-size: 2rem;
+    }
+    .profile-card {
+      padding: 1.25rem;
+      margin: 0;
+    }
+    .section-title {
+      font-size: 1.25rem;
+    }
+    .profile-details {
+      padding: 1rem;
+    }
+    .profile-image-container {
+      width: 150px;
+      height: 150px;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .profile-image-container {
+      width: 120px;
+      height: 120px;
+    }
+    .profile-card {
+      padding: 1rem;
+    }
+  }
+</style>
+{% endblock %}

@@ -1,0 +1,150 @@
+{% extends "employers/employer_dashboard.html" %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  {% block title %}
+  Employer Profile
+  {% endblock %}
+  <!-- Bootstrap CSS with custom dark mode -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  {% block css_content %}
+  
+  <style>
+    body {
+      background-color: #121212; /* Dark background */
+      color: #e0e0e0; /* Light text for readability */
+      margin: 0;
+      padding: 0;
+      height: 100vh; /* Ensure body takes full height */
+    }
+
+    .container {
+      display: flex;
+      justify-content: center; /* Center content horizontally */
+      align-items: center; /* Center content vertically */
+      height: 100%; /* Take full viewport height */
+      padding: 20px; /* Add some padding */
+      overflow: hidden; /* Hide scrolling */
+    }
+
+    /* Card customization */
+    .card {
+      background-color: #1e1e1e; /* Dark card background */
+      color: #ffffff; /* White text on cards */
+      border-radius: 10px;
+      transition: box-shadow 0.3s ease-in-out; /* Smooth transition */
+      max-width: 800px; /* Set max-width for a larger, fixed card */
+      width: 100%; /* Ensure the card takes up the full width within the max-width */
+      padding: 20px; /* Add some padding inside the card */
+    }
+
+    /* Glowing shadow effect */
+    .card:hover {
+      box-shadow: 0 0 15px 2px rgba(255, 255, 255, 0.7); /* Glowing effect */
+    }
+
+    /* Card header customization */
+    .card-header {
+      background-color: #333333; /* Dark header */
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+      font-size: 1.25rem;
+    }
+
+    .btn-success {
+      background-color: #4caf50; /* Green button */
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      font-size: 1rem;
+    }
+
+    .btn-success:hover {
+      background-color: #45a049; /* Darker green on hover */
+    }
+
+    /* Form input fields */
+    .form-control {
+      background-color: #333333; /* Dark input fields */
+      color: #ffffff; /* Light text inside inputs */
+      border: 1px solid #444444; /* Dark border */
+      border-radius: 5px; /* Rounded input borders */
+      font-size: 1rem; /* Standard font size */
+      transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Transition on focus */
+    }
+
+    .form-control:focus {
+      border-color: #6c757d; /* Lighter border on focus */
+      box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25); /* Focus shadow */
+    }
+
+    .alert-warning {
+      background-color: #ff9800; /* Orange background for warnings */
+      color: #000000; /* Dark text */
+    }
+
+    /* Mobile responsiveness: Adjust the form fields for smaller screens */
+    @media (max-width: 768px) {
+      .card-body {
+        padding: 15px;
+      }
+      .btn-success {
+        width: 100%; /* Make button full-width on smaller screens */
+      }
+      .form-control {
+        font-size: 0.9rem; /* Slightly smaller text for input fields */
+      }
+      .card {
+        max-width: 100%; /* Ensure the card can take the full width on mobile */
+      }
+    }
+  </style>
+  {% endblock %}
+</head>
+
+{% block content %}
+<body>
+  <div class="container mt-5">
+    <div class="card shadow">
+      <div class="card-header text-white">
+        <h4 class="mb-0">Employer Profile</h4>
+      </div>
+      <div class="card-body">
+        <p><strong>Name:</strong> {{ user.name }}</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        {% if profile %}
+          <form action="{% url 'edit_employer_profile' %}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="company_name" class="form-label">Company Name</label>
+              <input type="text" name="company_name" id="company_name" class="form-control" value="{{ profile.company_name }}" required />
+            </div>
+            <div class="mb-3">
+              <label for="website" class="form-label">Website</label>
+              <input type="url" name="website" id="website" class="form-control" value="{{ profile.website }}" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Company Proof</label>
+              {% if profile.company_proof %}
+                <p><a href="{{ profile.company_proof.url }}" target="_blank" class="text-info">View Uploaded Document</a></p>
+              {% else %}
+                <p class="text-muted">No document uploaded.</p>
+              {% endif %}
+              <input type="file" name="company_proof" class="form-control"/>
+            </div>
+            <button type="submit" class="btn btn-success">Save Changes</button>
+          </form>
+        {% else %}
+          <div class="alert alert-warning">Profile not created yet.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

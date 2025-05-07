@@ -1,0 +1,19 @@
+# Django is the main web framework used to build the Job Portal project
+Django>=4.2,<5.0
+
+# psycopg2-binary is the PostgreSQL adapter for Python, required to connect Django to a PostgreSQL database
+psycopg2-binary>=2.9
+
+# dj-database-url allows easy configuration of Django's DATABASES setting using a single DATABASE_URL
+dj-database-url>=1.0
+
+# Gunicorn WSGI HTTP Server for UNIX
+# https://gunicorn.org/
+gunicorn>=20.0
+
+# WhiteNoise for serving static files in Django
+# http://whitenoise.evans.io/
+whitenoise>=6.0
+
+
+
