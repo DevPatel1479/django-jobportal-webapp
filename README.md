@@ -15,7 +15,7 @@ Follow the steps below to set up the project locally.
    ```bash
    git clone https://github.com/DevPatel1479/django-jobportal-webapp.git
    cd django-jobportal-webapp
-
+   ```
 ### 2. **Create and Activate the Virtual Environment**
 
       The project uses a virtual environment for dependencies. To set it up:
@@ -28,7 +28,7 @@ Follow the steps below to set up the project locally.
         python3 -m venv webvenv
         source webvenv/bin/activate
     This will activate the virtual environment, and your terminal should show (webvenv) as the prompt.
-
+    
 ### 3. **Install Dependencies**
 
       Once the virtual environment is activated, install the required dependencies listed in requirements.txt:
