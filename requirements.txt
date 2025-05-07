@@ -16,4 +16,7 @@ gunicorn>=20.0
 whitenoise>=6.0
 
 
+# python-decouple to load environment variables (e.g. SECRET_KEY, DEBUG)
+python-decouple>=3.8
+
 
