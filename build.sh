@@ -11,7 +11,7 @@ python manage.py makemigrations
 # Convert static asset files
 python manage.py collectstatic --no-input
 
-python manage.py migrate users
+
 
 # Apply any outstanding database migrations
 python manage.py migrate
